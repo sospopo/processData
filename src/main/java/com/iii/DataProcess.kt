@@ -40,6 +40,7 @@ object DataProcess {
             val dataList = propertyDataMapper.queryAllItemIds()
             val total = dataList.size
             var current = 0
+            var count = 0
             dataList.chunked(100000) {
                 var propertyList = propertyDataMapper.queryByItemIds(it)
 
@@ -64,7 +65,8 @@ object DataProcess {
 
                 writer.write(resultList)
                 current += it.size
-                logger.info("total : ${total}, current : ${current}")
+                count += resultList.size
+                logger.info("total : ${total}, current : ${current}, count : ${count}")
             }
         }
     }
