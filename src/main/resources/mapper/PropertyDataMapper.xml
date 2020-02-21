@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?> <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iii.mapper.PropertyDataMapper">
+
+    <resultMap id="data" type="com.iii.model.PropertyData">
+        <id column="id" property="id" />
+        <result column="property" property="property" />
+        <result column="item_id" property="itemId" />
+        <result column="timestamp" property="timestamp" />
+        <result column="average" property="average" />
+    </resultMap>
+
+    <insert id="batchInsertData">
+        INSERT INTO property(item_id,property,value,timestamp,average)
+        VALUES
+        <foreach collection="dataList" item="data" separator=",">
+            (#{data.itemId},#{data.property},#{data.value},#{data.timestamp},${data.average})
+        </foreach>
+    </insert>
+
+
+    <select id="queryByIds" resultMap="data" >
+        select id, property, item_id, timestamp, average
+        from property
+        where
+        id in (
+        <foreach collection="ids" item="item" separator=",">
+            #{item}
+        </foreach>
+        )
+    </select>
+</mapper>
