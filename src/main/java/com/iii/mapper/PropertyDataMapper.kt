@@ -20,8 +20,8 @@ interface PropertyDataMapper {
     @Select("select t1.property as property, count(*) as count from property t1 group by t1.property order by count desc limit #{top}")
     fun queryTopCount(@Param("top") top: Int): MutableList<PropertyData>
 
-    @Select("select id from ${TableNames.PROPERTY} order by id asc")
-    fun queryAllIds(): List<Long>
+    @Select("select item_id from ${TableNames.PROPERTY} group by item_id")
+    fun queryAllItemIds(): List<Long>
 
-    fun queryByIds(@Param("ids") ids: List<Long>): MutableList<PropertyData>
+    fun queryByItemIds(@Param("itemIds") itemIds: List<Long>): MutableList<PropertyData>
 }

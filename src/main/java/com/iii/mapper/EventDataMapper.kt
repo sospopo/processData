@@ -12,11 +12,6 @@ import org.apache.ibatis.annotations.Select
  * @Email zhangchunmiao@kkworld.com
  */
 interface EventDataMapper {
+
     fun batchInsertData(@Param("dataList") dataList: List<Event>): Int
-
-    @Select("select count(*) from ${TableNames.EVENT}")
-    fun countAll(): Int
-
-    @Select("select id ,item_id ,visitor_id ,timestamp from ${TableNames.EVENT}")
-    fun queryAll(): MutableList<Event>
 }

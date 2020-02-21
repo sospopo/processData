@@ -19,12 +19,12 @@
     </insert>
 
 
-    <select id="queryByIds" resultMap="data" >
+    <select id="queryByItemIds" resultMap="data" >
         select id, property, item_id, timestamp, average
         from property
         where
-        id in (
-        <foreach collection="ids" item="item" separator=",">
+        item_id in (
+        <foreach collection="itemIds" item="item" separator=",">
             #{item}
         </foreach>
         )

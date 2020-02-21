@@ -19,47 +19,53 @@ object DataProcess {
     private val propertyDataMapper: PropertyDataMapper = DataContent.propertyDataMapper
     private val eventDataMapper: EventDataMapper = DataContent.eventDataMapper
 
-    private val keyJoiner = Joiner.on("_")
     private val valueJoiner = Joiner.on(", ")
     private val logger = LoggerFactory.getLogger(DataProcess::class.java)
 
-    private val gson = Gson()
+    private val joiner = Joiner.on("_")
 
     @JvmStatic
     fun main(args: Array<String>) {
-        val writer = CsvUtil.getWriter(File("result.csv"), Charsets.UTF_8)
+        processProperty()
+    }
+
+
+    private fun processProperty() {
+        val writer = CsvUtil.getWriter(File("property_result.csv"), Charsets.UTF_8)
         writer.use {
             writer.write(arrayOf("itemId", "timestamp", "embedding"))
             val topPropertyList = propertyDataMapper.queryTopCount(30)
-                    .map { it.property }
+                    .map { it.property }.toSet()
 
-            val dataList = propertyDataMapper.queryAllIds()
+            val dataList = propertyDataMapper.queryAllItemIds()
             val total = dataList.size
             var current = 0
             dataList.chunked(100000) {
-                var propertyList = propertyDataMapper.queryByIds(it)
+                var propertyList = propertyDataMapper.queryByItemIds(it)
 
-                val resultList = propertyList.map { data ->
-                    val sortedRes: String = topPropertyList
-                            .map { propertyId ->
-                                if (propertyId == data.property) {
-                                    data.average.toString()
+                val resultList = propertyList.groupBy { joiner.join(it.timestamp,it.itemId)  }
+                        .mapValues { values ->
+                            val filterMap = values.value.filter { topPropertyList.contains(it.property) }.map { it.property to it }.toMap()
+                            val timestamp = values.value.first().timestamp.toString()
+                            val itemId = values.value.first().itemId.toString()
+
+                            val resultValue = topPropertyList.map {
+                                if (filterMap.containsKey(it)) {
+                                    filterMap[it]!!.average.toString()
                                 } else {
                                     0.0.toString()
                                 }
                             }.reduce { acc: String, data: String ->
                                 valueJoiner.join(acc, data)
                             }
-                    val timestamp = data.timestamp.toString()
-                    val itemId = data.itemId.toString()
-                    arrayOf(itemId, timestamp, sortedRes)
-                }
+
+                            arrayOf(itemId, timestamp, resultValue)
+                        }.values
 
                 writer.write(resultList)
                 current += it.size
                 logger.info("total : ${total}, current : ${current}")
             }
         }
-
     }
 }

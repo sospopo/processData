@@ -40,5 +40,8 @@ create index visitor_index
     on event (visitor_id);
 
 
+select * from event order by visitor_id,timestamp
+
+
 
 
